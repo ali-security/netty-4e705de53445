@@ -326,8 +326,10 @@ public class PerMessageDeflateDecoderTest {
     public void testEmptyFrameDecompression() {
         EmbeddedChannel decoderChannel = new EmbeddedChannel(new PerMessageDeflateDecoder(false));
 
+        // Use a duplicate so decoding does not move the reader index of the shared EMPTY_DEFLATE_BLOCK, which
+        // PerMessageDeflateEncoderTest.testEmptyFrameCompression compares against while running concurrently.
         TextWebSocketFrame emptyDeflateBlockFrame = new TextWebSocketFrame(true, WebSocketExtension.RSV1,
-                                                                           EMPTY_DEFLATE_BLOCK);
+                                                                           EMPTY_DEFLATE_BLOCK.duplicate());
 
         assertTrue(decoderChannel.writeInbound(emptyDeflateBlockFrame));
         TextWebSocketFrame emptyBufferFrame = decoderChannel.readInbound();
